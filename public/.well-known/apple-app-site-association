@@ -1,5 +1,16 @@
 {
-  "applinks": {},
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "86978KA5GP.com.alexrc.finanzasok2404",
+        "paths": ["*"]
+      }
+    ]
+  },
+  "activityContinuation": {
+    "apps": ["86978KA5GP.com.alexrc.finanzasok2404"]
+  },
   "webcredentials": {
     "apps": ["86978KA5GP.com.alexrc.finanzasok2404"]
   },
