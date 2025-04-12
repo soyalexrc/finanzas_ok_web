@@ -76,7 +76,7 @@ const LoginPage = () => {
     }
     
     // Handle email submission
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(event.currentTarget as HTMLFormElement);
     const emailInput = formData.get('email') as string;
     setEmail(emailInput);
 
