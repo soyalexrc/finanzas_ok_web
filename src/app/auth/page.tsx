@@ -1,6 +1,6 @@
 "use client";
 import React, { Fragment, useState } from "react";
-import { Button } from "@/lib/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
@@ -11,7 +11,7 @@ import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-} from "@/lib/components/ui/input-otp";
+} from "@/components/ui/input-otp";
 
 const LoginPage = () => {
   const [step, setStep] = useState<
@@ -404,7 +404,7 @@ const LoginPage = () => {
             ? "Verifica tu OTP"
             : step === "checkUser"
             ? "Bienvenido a Finanzas Inteligentes"
-            : step === 'validationType' 
+            : step === 'validationType'
             ? "Como quieres iniciar sesión?"
             : "Iniciar Sesión"}
         </h2>
@@ -526,7 +526,7 @@ const LoginPage = () => {
         {
           step === "password" && (
             <div>
-            
+
               <label
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
@@ -579,7 +579,7 @@ const LoginPage = () => {
               strokeLinejoin="round"
             >
               <path d="M12 2L2 12h3v8h6v-6h4v6h6v-8h3L12 2z" />
-            
+
             </svg>
             <span className="inline-block">Volver</span>
           </button>
