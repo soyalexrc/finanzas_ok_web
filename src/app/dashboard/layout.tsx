@@ -1,5 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AuthProvider } from "@/lib/context/AuthContext";
 import { ReactNode } from "react";
 
 type LayoutProps = {
@@ -8,7 +9,7 @@ type LayoutProps = {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <div>
+    <AuthProvider>
       <SidebarProvider>
         <AppSidebar />
         <main className="flex flex-col w-full h-screen overflow-hidden">
@@ -16,6 +17,6 @@ export default function Layout({ children }: LayoutProps) {
           {children}
         </main>
       </SidebarProvider>
-    </div>
+    </AuthProvider>
   );
 }

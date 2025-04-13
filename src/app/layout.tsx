@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils";
+import Providers from '../components/Providers';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -30,7 +31,9 @@ export default function RootLayout({
       <body
         className={cn('min-h-screen bg-background font-sans antialiased overflow-x-hidden', geistSans.variable, geistMono.variable)}
       >
-        {children}
+          <Providers>
+            {children}
+          </Providers>
         <Toaster />
       </body>
     </html>

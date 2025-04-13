@@ -12,6 +12,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import api, { endpoints } from "@/lib/helpers/api";
 
 const LoginPage = () => {
   const [step, setStep] = useState<
@@ -31,17 +32,9 @@ const LoginPage = () => {
 
   const onVerifyOtp = async () => {
     try {
-      const response = await fetch("/api/auth/verifyOtp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, code: otp }),
-      });
+      const {data} = await api.post(endpoints.auth.verifyOtp, { email, code: otp });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (data) {
         toast.success("OTP verificado correctamente");
 
         if (authType === 'register') {
@@ -51,55 +44,28 @@ const LoginPage = () => {
 
         if (validationType === 'passkey') {
           // Step 1: Call the backend to get the challenge for passkey authentication
-          fetch("/api/auth/startAuthentication", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email, platform: "WEB" }),
-          })
-            .then((response) => response.json())
-            .then(async (data) => {
-              console.log(data);
-              const { challenge, authenticationOptions } = data;
-              const payload = {
-                ...authenticationOptions,
-                challenge,
-              };
-              console.log("Payload for authentication:", payload);
-              const result = await startAuthentication(payload);
+          const {data: startAuthResult} = await api.post(endpoints.auth.startAuthentication, {
+            email,
+            platform: "WEB",
+          });
 
-              fetch("/api/auth/completeAuthentication", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  email,
-                  authenticationResponse: result,
-                  challenge,
-                }),
-              })
-                .then((loginResponse) => loginResponse.json())
-                .then((data) => {
-                  toast.success("Autenticación correcta");
-                  // Example: Save the token and redirect the user
-                  sessionStorage.setItem(
-                    "access_token",
-                    data.user.access_token
-                  );
-                  sessionStorage.setItem("user", JSON.stringify(data.user));
-                  window.location.href = "/dashboard";
-                })
-                .catch((error) => {
-                  console.error("Error completing authentication:", error);
-                  toast.error("Error al completar la autenticación");
-                });
-            })
-            .catch((error) => {
-              console.error("Error starting authentication:", error);
-              toast.error("Error al iniciar la autenticación");
-            });
+          const { challenge, authenticationOptions } = startAuthResult;
+          const payload = {
+            ...authenticationOptions,
+            challenge,
+          };
+          const result = await startAuthentication(payload);
+          // Step 2: Call the backend to complete the authentication
+          const {data: completeAuthResult} = await api.post(endpoints.auth.completeAuthentication, {
+            email,
+            authenticationResponse: result,
+            challenge,
+          });
+          console.log("Complete authentication result:", completeAuthResult);
+          toast.success("Autenticación correcta");
+          sessionStorage.setItem("access_token", completeAuthResult.user.access_token);
+          sessionStorage.setItem("user", JSON.stringify(completeAuthResult.user));
+          window.location.href = "/dashboard";
         } else {
           setStep("password");
         }
@@ -115,15 +81,8 @@ const LoginPage = () => {
 
   const requestOtp = async () => {
     try {
-      const response = await fetch("/api/auth/requestOtp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      if (response.ok) {
+      const {data} = await api.post(endpoints.auth.requestOtp, { email });
+      if (data) {
         toast.success("Código enviado a tu correo electrónico");
       } else {
         toast.error("Error al enviar el código");
@@ -134,220 +93,86 @@ const LoginPage = () => {
     }
   };
 
-  const onStartAuthenticationWithValidationType = () => {
+  const onStartAuthenticationWithValidationType = async () => {
     if (authType === 'register') {
       setStep("password");
       return;
     }
     if (validationType === "passkey") {
       // Step 1: Call the backend to get the challenge for passkey authentication
-      fetch("/api/auth/startAuthentication", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, platform: "WEB" }),
-      })
-        .then((response) => response.json())
-        .then(async (data) => {
-          console.log(data);
-          const {
-            challenge,
-            authenticationOptions,
-            registrationOptions,
-            action,
-          } = data;
-          if (action === "LOGIN") {
-            const payload = {
-              ...authenticationOptions,
-              challenge,
-            };
-            console.log("Payload for authentication:", payload);
-            const result = await startAuthentication(payload);
-
-            fetch("/api/auth/completeAuthentication", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                email,
-                authenticationResponse: result,
-                challenge,
-              }),
-            })
-              .then((loginResponse) => loginResponse.json())
-              .then((data) => {
-                toast.success("Autenticación correcta");
-                // Example: Save the token and redirect the user
-                sessionStorage.setItem("access_token", data.user.access_token);
-                sessionStorage.setItem("user", JSON.stringify(data.user));
-                window.location.href = "/dashboard";
-              })
-              .catch((error) => {
-                console.error("Error completing authentication:", error);
-                toast.error("Error al completar la autenticación");
-              });
-          } else {
-            const payload = {
-              ...registrationOptions,
-              challenge,
-            };
-            const result = await startRegistration(payload);
-
-            fetch("/api/auth/completeRegistration", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                email,
-                registrationResponse: result,
-                platform: "WEB",
-                challenge,
-              }),
-            })
-              .then((loginResponse) => loginResponse.json())
-              .then((data) => {
-                toast.success("Autenticación correcta");
-                // Example: Save the token and redirect the user
-                sessionStorage.setItem("access_token", data.user.access_token);
-                sessionStorage.setItem("user", JSON.stringify(data.user));
-                window.location.href = "/dashboard";
-              })
-              .catch((error) => {
-                console.error("Error completing authentication:", error);
-                toast.error("Error al completar la autenticación");
-              });
-          }
-        })
-        .catch((error) => {
-          console.error("Error starting authentication:", error);
-          toast.error("Error al iniciar la autenticación");
-        });
-    } else {
-      fetch("/api/auth/requestOtp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
-      })
-        .then(() => {
-          setStep("otp");
-          toast.success("Código enviado a tu correo electrónico");
-        })
-        .catch((error) => {
-          console.error("Error sending OTP:", error);
-          toast.error("Error al enviar el código");
-        });
-    }
-  };
-
-  const onCodeSendForRegisterPassKey = async () => {
-    try {
-      const response = await fetch("/api/auth/validateEmailForRegister", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, code: otp }),
+      const {data: authRequest} = await api.post(endpoints.auth.startAuthentication, {
+        email,
+        platform: "WEB",
       });
 
-      const data = await response.json();
+      const { challenge, authenticationOptions, registrationOptions, action, } = authRequest;
 
-      if (response.ok) {
-        toast.success("Código enviado a tu correo electrónico");
+      if (action === "LOGIN") {
+        const payload = {
+          ...authenticationOptions,
+          challenge,
+        };
+        console.log("Payload for authentication:", payload);
+        const result = await startAuthentication(payload);
 
-        // Step 2: Use the SimpleWebAuthn `startAuthentication` API
-        const registrationResult = await startRegistration(data);
+        const {data: completeAuthenticationResult} = await api.post(endpoints.auth.completeAuthentication, {
+          email,
+          authenticationResponse: result,
+          challenge,
+        })
 
-        console.log("RegistrationResult result:", registrationResult);
-
-        if (registrationResult) {
-          // Step 3: Send the authentication result back to the backend to complete authentication
-          const completeResponse = await fetch(
-            "/api/auth/complete-authentication",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                email,
-                authenticationResponse: registrationResult,
-                platform: "WEB",
-                challenge: data.challenge,
-              }),
-            }
-          );
-
-          const completeData = await completeResponse.json();
-
-          console.log("Complete authentication data:", completeData);
-
-          if (completeResponse.ok) {
-            toast.success("Autenticación correcta");
-            // Example: Save the token and redirect the user
-            localStorage.setItem(
-              "access_token",
-              completeData.user.access_token
-            );
-            window.location.href = "/dashboard";
-          } else {
-            toast.error("Error al autenticar");
-          }
-        }
+        toast.success("Autenticación correcta");
+        // Example: Save the token and redirect the user
+        sessionStorage.setItem("access_token", completeAuthenticationResult.user.access_token);
+        sessionStorage.setItem("user", JSON.stringify(completeAuthenticationResult.user));
+        window.location.href = "/dashboard";
       } else {
-        toast.error(data.message || "Error al enviar el código");
+        const payload = {
+          ...registrationOptions,
+          challenge,
+        };
+        const result = await startRegistration(payload);
+
+        const { data: completeRegistrationResult } = await api.post(endpoints.auth.completeRegistration, {
+          email,
+          registrationResponse: result,
+          platform: "WEB",
+          challenge,
+        });
+
+        toast.success("Autenticación correcta");
+        // Example: Save the token and redirect the user
+        sessionStorage.setItem("access_token", completeRegistrationResult.user.access_token);
+        sessionStorage.setItem("user", JSON.stringify(completeRegistrationResult.user));
+        window.location.href = "/dashboard";
       }
-    } catch (error) {
-      console.error("Error sending code:", error);
-      toast.error("Ocurrió un error inesperado");
+    } else {
+      const {data} = await api.post(endpoints.auth.requestOtp, {
+        email,
+      });
+
+      if (data) {
+        setStep("otp");
+        toast.success("Código enviado a tu correo electrónico");
+      }
     }
   };
 
   const handleLogin = async () => {
     try {
      if (authType === 'register') {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      const {data: registerResult} = await api.post(endpoints.auth.register, { email, password });
         toast.success("Registro exitoso");
-        sessionStorage.setItem("access_token", data.user.access_token);
-        sessionStorage.setItem("user", JSON.stringify(data.user));
+        sessionStorage.setItem("access_token", registerResult.user.access_token);
+        sessionStorage.setItem("user", JSON.stringify(registerResult.user));
         window.location.href = "/dashboard";
-      } else {
-        toast.error(data.message || "Error al registrar");
-      }
       return;
      } else {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      const {data: loginResult} = await api.post(endpoints.auth.login, { email, password });
         toast.success("Inicio de sesión exitoso");
-        sessionStorage.setItem("access_token", data.user.access_token);
-        sessionStorage.setItem("user", JSON.stringify(data.user));
+        sessionStorage.setItem("access_token", loginResult.user.access_token);
+        sessionStorage.setItem("user", JSON.stringify(loginResult.user));
         window.location.href = "/dashboard";
-      } else {
-        toast.error(data.message || "Error al iniciar sesión");
-      }
      }
     } catch (error) {
       console.error("Error during login:", error);
@@ -358,27 +183,14 @@ const LoginPage = () => {
 
   const warmUpAuthentication = async () => {
       try {
-        const response = await fetch("/api/auth/checkUserByEmail", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          if (!data.userFound) {
-            setAuthType('register');
-            toast.info(data.message);
-            setStep("otp");
-          } else {
-            toast.success(data.message);
-            setStep("validationType");
-          }
+        const {data} = await api.post(endpoints.auth.checkUserByEmail, { email });
+        if (!data.userFound) {
+          setAuthType('register');
+          toast.info(data.message);
+          setStep("otp");
         } else {
-          toast.error("Error al verificar el usuario");
+          toast.success(data.message);
+          setStep("validationType");
         }
       } catch (error) {
         console.error("Error verifying user:", error);
