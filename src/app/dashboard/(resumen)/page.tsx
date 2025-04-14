@@ -1,9 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { toast } from "sonner";
 import { useAuth } from "@/lib/context/AuthContext";
-import { useRouter } from "next/navigation";
 import useCurrencyStore from "@/lib/store/currency-store";
 import useDateFilterStore from "@/lib/store/date-filter-store";
 import {
@@ -23,7 +20,6 @@ import {
 import { Swiper, SwiperSlide } from "swiper/react";
 import {
   Autoplay,
-  EffectCoverflow,
   Navigation,
   Pagination,
 } from "swiper/modules";
@@ -35,10 +31,6 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default function ResumenPage() {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
   const currency = useCurrencyStore((state) => state.selectedCurrency);
   const year = useDateFilterStore((state) => state.year);
   const { user, token } = useAuth();
@@ -46,20 +38,14 @@ export default function ResumenPage() {
   const {
     data: monthlyStatistics,
     isPending: monthlyStatisticsLoading,
-    error: monthlyStatisticsError,
-    refetch: recallMonthlyStatistics,
   } = useMonthlyStatistics(user._id, year, currency._id, token);
   const {
     data: statisticsByCurrencyAndYear,
     isPending: statisticsByCurrencyAndYearLoading,
-    error: statisticsByCurrencyAndYearError,
-    refetch: recallStatisticsByCurrencyAndYear,
   } = useStatisticsByCurrencyAndYear(user._id, year, currency._id, token);
   const {
     data: monthlyTotalsByCategory,
     isPending: monthlyTotalsByCategoryLoading,
-    error: monthlyTotalsByCategoryError,
-    refetch: recallMonthlyTotalsByCategory,
   } = useMonthlyTotalsByCategory(user._id, "expense", currency._id, token);
 
   return (
@@ -85,10 +71,7 @@ export default function ResumenPage() {
                 onChartPressed={(data) => {
                   console.log("data", data);
                 }}
-                width={300}
                 data={monthlyStatistics}
-                currency={currency.code}
-                height={300}
               />
             </div>
           ) : (

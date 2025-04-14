@@ -4,10 +4,6 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  LineChart,
-  Line,
-  Dot,
-  Legend,
   BarChart,
   Bar,
 } from "recharts";
@@ -27,11 +23,8 @@ import {
 import useDateFilterStore from "@/lib/store/date-filter-store";
 // Define the props for the component
 type TransactionsPerMonthChartProps = {
-  width: number;
-  height: number;
   data: any[];
   onChartPressed: (data: any) => void;
-  currency: string;
 };
 
 const chartConfig = {
@@ -46,10 +39,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function TransactionsPerMonthChart({
-  width,
-  height,
   data,
-  currency,
 }: TransactionsPerMonthChartProps) {
   const year = useDateFilterStore((state) => state.year);
 

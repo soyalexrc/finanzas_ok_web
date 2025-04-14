@@ -4,18 +4,12 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AuthProvider, useAuth } from "@/lib/context/AuthContext";
 import { ReactNode, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
-import { useEffect } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { CurrencySelector } from "@/components/currency-selector";
-import { useScroll } from "framer-motion";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { useCurrencies } from "@/lib/helpers/api/currencies/queries";
-import useCurrencyStore from "@/lib/store/currency-store";
-import { CurrencyV2 } from "@/lib/types/currency";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -30,7 +24,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 type LayoutProps = {

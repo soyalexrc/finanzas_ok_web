@@ -28,11 +28,11 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     console.log(error.response);
-    // if (error.response?.status === 401 && !isAlertShown) {
-      // isAlertShown = true; // Set flag to prevent multiple alerts
-      // toast.error("Su sesión ha vencido. Por favor, inicie sesión nuevamente.");
-      // await logoutUser();
-    // }
+    if (error.response?.status === 401 && !isAlertShown) {
+      isAlertShown = true; // Set flag to prevent multiple alerts
+      toast.error("Su sesión ha vencido. Por favor, inicie sesión nuevamente.");
+      await logoutUser();
+    }
     return Promise.reject(error);
   }
 );

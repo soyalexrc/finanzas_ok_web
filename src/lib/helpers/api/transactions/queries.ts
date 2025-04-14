@@ -34,12 +34,6 @@ interface MonthlyTotalsByCategoryPayload  {
 }
 
 
-interface MonthlyStatisticsPayload extends YearlyExpensesByCategoryPayload {
-}
-
-interface StatisticsByCurrencyAndYearPayload extends YearlyExpensesByCategoryPayload {
-}
-
 const fetchYearlyExpensesByCategory = async ({userId, year, currency, token}: YearlyExpensesByCategoryPayload) => {
     const response = await api.post(endpoints.transactions.getYearlyExpensesByCategory, {
         userId, year, currency
@@ -54,7 +48,7 @@ const fetchYearlyExpensesByCategory = async ({userId, year, currency, token}: Ye
     return response.data;
 };
 
-const fetchMonthlyStatistics = async ({userId, year, currency, token}: MonthlyStatisticsPayload) => {
+const fetchMonthlyStatistics = async ({userId, year, currency, token}: YearlyExpensesByCategoryPayload) => {
     const response = await api.post(endpoints.transactions.getMonthlyStatistics, {
         userId, year, currency
     }, {
@@ -88,7 +82,7 @@ const fetchStatisticsByCurrencyAndYear = async ({
                                                     year,
                                                     currency,
                                                     token
-                                                }: StatisticsByCurrencyAndYearPayload) => {
+                                                }: YearlyExpensesByCategoryPayload) => {
     const response = await api.post(endpoints.transactions.getStatisticsByCurrencyAndYear, {
         userId, year, currency
     }, {
