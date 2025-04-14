@@ -153,7 +153,7 @@ export default function ResumenPage() {
                 modules={[Pagination, Autoplay, Navigation]}
                 className="mySwiper"
               >
-                {monthlyTotalsByCategory.map((item) => (
+                {monthlyTotalsByCategory.map((item: any) => (
                   <SwiperSlide key={item.category.title} className="mb-10">
                     <div className="flex flex-col items-center justify-center">
                       <p className="text-4xl">{item.category.icon}</p>
