@@ -33,7 +33,6 @@ const useCurrencyStore = create<CurrencyStoreState>()(
       setSelectedCurrency: (currency: CurrencyV2) => set({ selectedCurrency: currency }),
       reset: () =>
         set({
-          currencies: [],
           selectedCurrency: {
             symbol: "$",
             _id: DEFAULT_CURRENCY_ID_USD,

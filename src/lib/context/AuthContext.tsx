@@ -75,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     sessionStorage.removeItem('user');
     setUser({});
     setToken('');
-    router.replace('/');
+    router.replace('/auth');
   };
 
   return (

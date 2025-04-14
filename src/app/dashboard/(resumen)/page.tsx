@@ -1,46 +1,70 @@
-'use client'
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { toast } from 'sonner';
-import { useAuth } from '@/lib/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import useCurrencyStore from '@/lib/store/currency-store';
-import useDateFilterStore from '@/lib/store/date-filter-store';
-import { useMonthlyStatistics, useMonthlyTotalsByCategory, useStatisticsByCurrencyAndYear } from '@/lib/helpers/api/transactions/queries';
-import TransactionsPerMonthChart from '@/components/transactions/TransactionsPerMonthChart';
+"use client";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
+import { useAuth } from "@/lib/context/AuthContext";
+import { useRouter } from "next/navigation";
+import useCurrencyStore from "@/lib/store/currency-store";
+import useDateFilterStore from "@/lib/store/date-filter-store";
+import {
+  useMonthlyStatistics,
+  useMonthlyTotalsByCategory,
+  useStatisticsByCurrencyAndYear,
+} from "@/lib/helpers/api/transactions/queries";
+import TransactionsPerMonthChart from "@/components/transactions/TransactionsPerMonthChart";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import { Swiper, SwiperSlide } from "swiper/react";
+import {
+  Autoplay,
+  EffectCoverflow,
+  Navigation,
+  Pagination,
+} from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/effect-coverflow";
+import "swiper/css/pagination";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 export default function ResumenPage() {
   const [modalVisible, setModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const currency = useCurrencyStore((state) => state.selectedCurrency)
-  const year =useDateFilterStore((state) => state.year)
+  const currency = useCurrencyStore((state) => state.selectedCurrency);
+  const year = useDateFilterStore((state) => state.year);
   const { user, token } = useAuth();
 
   const {
     data: monthlyStatistics,
     isPending: monthlyStatisticsLoading,
     error: monthlyStatisticsError,
-    refetch: recallMonthlyStatistics
-} = useMonthlyStatistics(user._id, year, currency._id, token)
-const {
+    refetch: recallMonthlyStatistics,
+  } = useMonthlyStatistics(user._id, year, currency._id, token);
+  const {
     data: statisticsByCurrencyAndYear,
     isPending: statisticsByCurrencyAndYearLoading,
     error: statisticsByCurrencyAndYearError,
     refetch: recallStatisticsByCurrencyAndYear,
-} = useStatisticsByCurrencyAndYear(user._id, year, currency._id, token)
-const {
+  } = useStatisticsByCurrencyAndYear(user._id, year, currency._id, token);
+  const {
     data: monthlyTotalsByCategory,
     isPending: monthlyTotalsByCategoryLoading,
     error: monthlyTotalsByCategoryError,
     refetch: recallMonthlyTotalsByCategory,
-} = useMonthlyTotalsByCategory(user._id, 'expense', currency._id, token)
-
+  } = useMonthlyTotalsByCategory(user._id, "expense", currency._id, token);
 
   return (
     <motion.div
-      className="min-h-screen bg-gray-100"
+      className="min-h-screen p-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -48,28 +72,123 @@ const {
       <div className="container mx-auto py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Resumen</h1>
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-          >
+          <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
             Refresh
           </button>
         </div>
 
-        {
-          !monthlyStatisticsLoading && monthlyStatistics?.length > 0 &&
-          <div style={{height: 260, padding: 5, position: 'relative'}}>
-              <p style={{textAlign: 'center', fontSize: 20}}>Gastado en {year}</p>
+        <div className="grid grid-cols-12 gap-6">
+          {/* First Column */}
+          {!monthlyStatisticsLoading && monthlyStatistics?.length > 0 ? (
+            <div className="col-span-12 md:col-span-5">
               <TransactionsPerMonthChart
-                  onChartPressed={(data) => {
-                      console.log('data', data)
-                  }}
-                  width={300}
-                  data={monthlyStatistics}
-                  currency={currency.code}
-                  height={245}
+                onChartPressed={(data) => {
+                  console.log("data", data);
+                }}
+                width={300}
+                data={monthlyStatistics}
+                currency={currency.code}
+                height={300}
               />
-          </div>
+            </div>
+          ) : (
+            <div className="col-span-12 md:col-span-5 flex items-center justify-center">
+              <div className="w-72 h-72 bg-gray-200 animate-pulse rounded-lg"></div>
+            </div>
+          )}
+
+          {
+            !statisticsByCurrencyAndYearLoading && statisticsByCurrencyAndYear ? (
+            <div className="col-span-12 md:col-span-7 max-h-[400px] grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="bg-white shadow-md rounded-lg">
+                <CardHeader>
+                  <CardTitle>Gastado este mes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold">{currency.symbol} {statisticsByCurrencyAndYear?.totalCurrentMonth}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white shadow-md rounded-lg">
+                <CardHeader>
+                  <CardTitle>Gastado el mes pasado</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold">{currency.symbol} {statisticsByCurrencyAndYear?.totalLastMonth}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white shadow-md rounded-lg">
+                <CardHeader>
+                  <CardTitle>Gastado la semana pasada</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold">{currency.symbol} {statisticsByCurrencyAndYear?.totalLastWeek}</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white shadow-md rounded-lg">
+                <CardHeader>
+                  <CardTitle>Gastado durante {year}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold">{currency.symbol} {statisticsByCurrencyAndYear?.totalSpentOnYear}</p>
+                </CardContent>
+              </Card>
+            </div>
+            ) : (
+            <div className="col-span-12 md:col-span-7 max-h-[400px] grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-gray-200 animate-pulse rounded-lg h-32"></div>
+              <div className="bg-gray-200 animate-pulse rounded-lg h-32"></div>
+              <div className="bg-gray-200 animate-pulse rounded-lg h-32"></div>
+              <div className="bg-gray-200 animate-pulse rounded-lg h-32"></div>
+            </div>
+            )
           }
+
+         
+        </div>
+
+        {!monthlyTotalsByCategoryLoading && monthlyTotalsByCategory?.length > 0 ? (
+          <Card className="mt-5 max-h-[400px] bg-white shadow-md rounded-lg ">
+            <CardHeader>
+              <CardTitle>Gastado este mes por categoria</CardTitle>
+              <CardDescription className="uppercase">
+                {format(new Date(), "MMMM", { locale: es })}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Swiper
+                loop
+                autoplay={{ delay: 2500, disableOnInteraction: false }}
+                grabCursor={true}
+                centeredSlides={true}
+                slidesPerView={3}
+                pagination={{
+                  clickable: true,
+                }}
+                modules={[Pagination, Autoplay, Navigation]}
+                className="mySwiper"
+              >
+                {monthlyTotalsByCategory.map((item) => (
+                  <SwiperSlide key={item.category.title} className="mb-10">
+                    <div className="flex flex-col items-center justify-center">
+                      <p className="text-4xl">{item.category.icon}</p>
+                      <h2 className="text-lg font-semibold">
+                        {item.category.title}
+                      </h2>
+                      <p className="text-gray-500 text-sm">
+                        Gastado: {item.value} {currency.code}
+                      </p>
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="mt-5 max-h-[400px] bg-gray-200 animate-pulse rounded-lg h-64"></div>
+        )}
       </div>
     </motion.div>
   );
