@@ -144,7 +144,6 @@ export default function ResumenPage() {
               <Swiper
                 loop
                 autoplay={{ delay: 2500, disableOnInteraction: false }}
-                grabCursor={true}
                 centeredSlides={true}
                 slidesPerView={3}
                 pagination={{
@@ -155,7 +154,7 @@ export default function ResumenPage() {
               >
                 {monthlyTotalsByCategory.map((item: any) => (
                   <SwiperSlide key={item.category.title} className="mb-10">
-                    <div className="flex flex-col items-center justify-center">
+                    <div className="flex flex-col items-center justify-center cursor-pointer">
                       <p className="text-4xl">{item.category.icon}</p>
                       <h2 className="text-lg font-semibold">
                         {item.category.title}

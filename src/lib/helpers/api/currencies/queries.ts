@@ -12,7 +12,7 @@ export const useCurrencies = (token: string) => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            return response.data;
+            return response?.data;
         }
     })
 }
