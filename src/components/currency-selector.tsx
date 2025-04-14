@@ -7,20 +7,23 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { useCurrencies } from "@/lib/helpers/api/currencies/queries";
 import { useAuth } from "@/lib/context/AuthContext";
+import { CurrencyV2 } from "@/lib/types/currency";
 
 export function CurrencySelector() {
-  const { currencies, selectedCurrency, setSelectedCurrency } = useCurrencyStore();
+  const { currencies, selectedCurrency, setSelectedCurrency, setCurrencies } = useCurrencyStore();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
+  const { token } = useAuth();
+  const {isLoading, data} = useCurrencies(token);
 
   useEffect(() => {
+    setCurrencies(data as CurrencyV2[]);
     setValue(selectedCurrency?.code);
   }
   , [selectedCurrency]);
 
 
-    const { token } = useAuth();
-    const {isLoading} = useCurrencies(token);
+
 
   
   
