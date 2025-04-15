@@ -2,28 +2,19 @@
 
 import {useTransactionsGroupedByDay} from "@/lib/helpers/api/transactions/queries";
 import {getCustomMonthRange} from "@/lib/helpers/date";
-import {useState} from "react";
+// import {useState} from "react";
 import {useAuth} from "@/lib/context/AuthContext";
 import {columns} from "@/components/transactions/search/columns";
 import {DataTable} from "@/components/transactions/search/data-table";
 import {Card, CardContent} from "@/components/ui/card";
-import {
-    Sheet, SheetClose,
-    SheetContent,
-    SheetDescription,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger
-} from "@/components/ui/sheet";
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
 
 export default function Screen() {
-    const [dateFrom, setDateFrom] = useState<string>(getCustomMonthRange(2, 2).start.toISOString());
-    const [dateTo, setDateTo] = useState<string>(getCustomMonthRange(2, 2).end.toISOString());
+    // const [dateFrom, setDateFrom] = useState<string>(getCustomMonthRange(2, 2).start.toISOString());
+    // const [dateTo, setDateTo] = useState<string>(getCustomMonthRange(2, 2).end.toISOString());
     const { user, token } = useAuth();
-    const {data: transactions, refetch, isLoading} = useTransactionsGroupedByDay(user?._id, dateFrom, dateTo, '', token);
+    const {data: transactions, isLoading} = useTransactionsGroupedByDay(user?._id, getCustomMonthRange(2, 5).start.toISOString(), getCustomMonthRange(2, 5).end.toISOString(), '', token);
 
     return (
         <div className="flex flex-col p-4  h-screen">
