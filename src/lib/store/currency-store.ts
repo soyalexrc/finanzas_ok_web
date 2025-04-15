@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { CurrencyV2 } from "../types/currency";
 
-const DEFAULT_CURRENCY_ID_USD = "67b60a53743e50fa9d4b5fc2";
+export const DEFAULT_CURRENCY_ID_USD = "67b60a53743e50fa9d4b5fc2";
 
 // Define the store's state and actions
 interface CurrencyStoreState {

@@ -73,7 +73,7 @@ function Layout({ children }: LayoutProps) {
         </motion.div>
         <AppSidebar />
 
-        <main className="flex bg-gray-100 flex-col w-full h-screen overflow-x-hidden pt-16">
+        <main className="flex bg-gray-50 flex-col w-full h-screen overflow-x-hidden pt-16">
           {children}
         </main>
 
