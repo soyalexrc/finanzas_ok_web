@@ -7,8 +7,6 @@ dist
 .DS_Store
 .git
 .gitignore
-firebase.json
-firebase/
 *.local
 coverage
 Dockerfile
