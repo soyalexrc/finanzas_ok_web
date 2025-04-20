@@ -1,42 +1,27 @@
-# -------- Build Stage --------
-FROM node:20.18 AS builder
+# ---------- Build Stage ----------
+FROM node:20.18-alpine AS builder
 
 WORKDIR /app
 
-# Copy only the package files first (to leverage Docker layer caching)
-COPY package.json package-lock.json ./
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
-# Install dependencies
-RUN npm ci
-
-# Copy the rest of your app's source code
 COPY . .
+RUN yarn build
 
-# Build the Next.js app (includes both client & server code)
-RUN npm run build
-
-# -------- Production Stage --------
+# ---------- Production Stage ----------
 FROM node:20.18-alpine AS runner
 
 WORKDIR /app
 
-# Install only production dependencies
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
-
-# Copy the built app from the builder stage
-COPY --from=builder /app/.next ./.next
+# Copy the minimal app output (includes minimal node_modules)
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.js ./next.config.js
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/node_modules ./node_modules
 
-# Optional: Set environment variables
 ENV NODE_ENV=production
 ENV PORT=8080
 
-# Expose port
 EXPOSE 8080
 
-# Start the Next.js server
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

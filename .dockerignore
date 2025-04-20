@@ -1,0 +1,16 @@
+node_modules
+.next
+dist
+*.log
+.env*
+.vscode
+.DS_Store
+.git
+.gitignore
+firebase.json
+firebase/
+*.local
+coverage
+Dockerfile
+docker-compose.yml
+README.md
